@@ -8,8 +8,7 @@ jQuery(document).ready(function() {
         SOLeadOriginCookie = function() {
             var cookieName = 'LeadOrigin';
             var attributes = {
-                domain: "dev-so.com",
-                // domain: "simpleorder.com" // TODO: uncomment
+                domain: ".simpleorder.com",
                 expires: 30,
             };
 
@@ -19,10 +18,10 @@ jQuery(document).ready(function() {
                     return InternalCookies.getJSON(cookieName);
                 },
                 set: function(value) {
-                    InternalCookies.set(cookieName, value);
+                    InternalCookies.set(cookieName, value, attributes);
                 },
                 remove: function() {
-                    InternalCookies.remove(cookieName);
+                    InternalCookies.remove(cookieName, attributes);
                 }
             };
         }();
