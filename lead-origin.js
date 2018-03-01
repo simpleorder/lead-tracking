@@ -2,17 +2,21 @@ jQuery(document).ready(function() {
     function getURLParam(name) {
         return decodeURIComponent((new RegExp('[?|&]' + name + '=' + '([^&;]+?)(&|#|;|$)').exec(window.location.search) || [null, ''])[1].replace(/\+/g, '%20')) || null;
     }
-        
+
+    function referrerIsExternal(referrer) {
+        return referrer && referrer.indexOf(window.location.hostname) === -1;
+    }
+
     var storeLeadSource = function(e) {
 
         SOLeadOriginCookie = function() {
             var cookieName = 'LeadOrigin';
             var attributes = {
-                domain: ".simpleorder.com",
+                domain: "." + window.location.hostname,
                 expires: 30,
             };
 
-            InternalCookies = Cookies.noConflict();
+            var InternalCookies = Cookies.noConflict();
             return {
                 get: function() {
                     return InternalCookies.getJSON(cookieName);
@@ -27,6 +31,7 @@ jQuery(document).ready(function() {
         }();
 
         var cook = SOLeadOriginCookie.get();
+        var referrer = document.referrer || null;
 
         if (cook === undefined) {
             // Collect values from query params
@@ -38,9 +43,23 @@ jQuery(document).ready(function() {
             }
 
             // Collect referrer
-            cookieValue.referrer = document.referrer || null;
+            cookieValue.referrer = referrer;
 
             SOLeadOriginCookie.set(cookieValue);
+        }
+
+        if (referrerIsExternal()) {
+            var cookieValue = SOLeadOriginCookie.get();
+            var referrers = cookieValue.referrers || [];
+
+            if (referrers.slice(-1) == referrer) {
+                var maxReferrersToSave = 5;
+                var updatedReferrers = referrers.slice(-1 * (maxReferrersToSave - 1)).concat(referrer);
+
+                window.intercomSettings = {
+                    referrers: JSON.stringify(updatedReferrers)
+                };
+            }
         }
     };
 
